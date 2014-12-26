@@ -1,0 +1,6 @@
+(def socket (com.savarese.rocksaw.net.RawSocket.))
+(.open socket com.savarese.rocksaw.net.RawSocket/PF_INET (com.savarese.rocksaw.net.RawSocket/getProtocolByName "ip"))
+(.setIPHeaderInclude socket true)
+(println socket)
+(.close socket)
+(println "Done")
