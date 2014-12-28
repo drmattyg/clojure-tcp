@@ -1,4 +1,5 @@
 (ns tcp)
+(require '[clojure.math.numeric-tower :as math])
 (defn dump-packet [& headers]
   (doseq [header headers]
     (println (Integer/toBinaryString header))
@@ -25,6 +26,13 @@
     ; data goes here after word 5
 )
 
+(defn make-bitmask [size offset]
+   (-> (math/expt 2 size) 
+    (- 1) ; 2^n - 1
+    (bit-shift-left offset)) ; 2^n - 1 << offset
+    (bit-not)
+  )
+
 (defn set-header-value [flag value header]
   "Arguments: 
     - a symbol from tcp/header-template specifying to value to set (e.g., :ack-num, :urg etc)
@@ -38,6 +46,17 @@
           {word-offset :word-offset byte-offset :byte-offset size :size} 
           (tcp/header-template flag)
         ]
-     
+     (map-indexed 
+        #(if (= %1 word-offset)
+          ; true
+          (bit-or
+            (bit-and %2 (make-bitmask size byte-offset)) ; first clear the flag then set it
+            (bit-shift-left %2 offset)
+          )
+          ; false
+          %2
+        ) 
+        header
+    )
   )
 )
