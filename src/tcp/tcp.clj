@@ -29,9 +29,10 @@
   "Generate an inverted bitmask with 'size zeros offset by 'offset ones"
    (-> (math/expt 2 size) 
     (- 1) ; 2^n - 1 e.g. 1111...size
-    (bit-shift-left offset)) ; 2^n - 1 << offset e.g. 2r111...size 000...offset
+    (bit-shift-left offset) ; 2^n - 1 << offset e.g. 2r111...size 000...offset
     (bit-not) ; invert it
   )
+)
 
 (defn set-header-value [flag value header]
   "Arguments: 
@@ -51,7 +52,7 @@
           ; true
           (bit-or
             (bit-and %2 (make-bitmask size byte-offset)) ; first clear the flag...
-            (bit-shift-left %2 offset) ; ...then set it
+            (bit-shift-left %2 byte-offset) ; ...then set it
           )
           ; false
           %2
