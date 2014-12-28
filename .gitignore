@@ -4,7 +4,7 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
+# *.jar ; manually managing my dependencies so I will include my lib file
 *.war
 *.ear
 
