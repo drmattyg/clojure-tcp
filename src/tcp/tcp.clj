@@ -7,9 +7,8 @@
 
   )
 (defn make-offset [word-offset byte-offset size] {:word-offset word-offset :byte-offset byte-offset :size size})
-(def header-template ; header is represented as a vector of 32 bit words
-  ; each value in each hash is an offset into the word for that value
-  ; e.g. :flags is offset 10 bits into the 4th word
+(def header-template 
+    ; header is represented as a map of flags, each with a word offset, byte offset (into the word) and a size in bits
     {
       :source-port (make-offset 0 0 16)
       :destination-port (make-offset 0 16 16)
@@ -27,10 +26,11 @@
 )
 
 (defn make-bitmask [size offset]
+  "Generate an inverted bitmask with 'size zeros offset by 'offset ones"
    (-> (math/expt 2 size) 
-    (- 1) ; 2^n - 1
-    (bit-shift-left offset)) ; 2^n - 1 << offset
-    (bit-not)
+    (- 1) ; 2^n - 1 e.g. 1111...size
+    (bit-shift-left offset)) ; 2^n - 1 << offset e.g. 2r111...size 000...offset
+    (bit-not) ; invert it
   )
 
 (defn set-header-value [flag value header]
@@ -50,8 +50,8 @@
         #(if (= %1 word-offset)
           ; true
           (bit-or
-            (bit-and %2 (make-bitmask size byte-offset)) ; first clear the flag then set it
-            (bit-shift-left %2 offset)
+            (bit-and %2 (make-bitmask size byte-offset)) ; first clear the flag...
+            (bit-shift-left %2 offset) ; ...then set it
           )
           ; false
           %2
