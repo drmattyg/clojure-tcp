@@ -6,7 +6,7 @@
       )
 
   )
-(defn make-offset [word-offset byte-offset size] {:word-offset word-offset :byte-offset byte-offset :size size})
+(defn make-offset [word-offset bit-offset size] {:word-offset word-offset :bit-offset bit-offset :size size})
 (def header-template 
     ; header is represented as a map of flags, each with a word offset, byte offset (into the word) and a size in bits
     {
@@ -45,15 +45,15 @@
   "
   ; pull apart the header template to get the word offset and byte offset for the flag in question
   (let [
-          {word-offset :word-offset byte-offset :byte-offset size :size} 
+          {word-offset :word-offset bit-offset :bit-offset size :size} 
           (tcp/header-template flag)
         ]
      (map-indexed 
         #(if (= %1 word-offset)
           ; true
           (bit-or
-            (bit-and %2 (make-bitmask size byte-offset)) ; first clear the flag...
-            (bit-shift-left %2 byte-offset) ; ...then set it
+            (bit-and %2 (make-bitmask size bit-offset)) ; first clear the flag...
+            (bit-shift-left %2 bit-offset) ; ...then set it
           )
           ; false
           %2
