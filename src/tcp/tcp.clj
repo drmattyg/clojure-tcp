@@ -31,10 +31,11 @@
     (- 1) ; 2^n - 1 e.g. 1111...size
     (bit-shift-left offset) ; 2^n - 1 << offset e.g. 2r111...size 000...offset
     (bit-not) ; invert it
+    (int) ; returns Long, we want a 32 bit int
   )
 )
 
-(defn set-header-value [flag value header]
+(defn set-header-value [header flag value]
   "Arguments: 
     - a symbol from tcp/header-template specifying to value to set (e.g., :ack-num, :urg etc)
     - a value to which to set the symbol in question
