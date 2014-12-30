@@ -31,7 +31,7 @@
     (- 1) ; 2^n - 1 e.g. 1111...size
     (bit-shift-left offset) ; 2^n - 1 << offset e.g. 2r111...size 000...offset
     (bit-not) ; invert it
-    (int) ; returns Long, we want a 32 bit int
+;    (int) ; returns Long, we want a 32 bit int
   )
 )
 
@@ -53,7 +53,7 @@
           ; true
           (bit-or
             (bit-and %2 (make-bitmask size bit-offset)) ; first clear the flag...
-            (bit-shift-left %2 bit-offset) ; ...then set it
+            (bit-or (bit-shift-left value bit-offset) %2) ; ...then set it
           )
           ; false
           %2

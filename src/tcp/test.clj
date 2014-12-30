@@ -25,5 +25,16 @@
         [0 0 0 2r1011010000000000]
       )
     )
+    (test/is
+      (=
+        (tcp/set-header-value blank-header :seq-num 51976)
+        [0 51976 0 0]
+      )
+    )
+    ; (test/is (=
+    ;   (-> blank-header (tcp/set-header-value :flags 2r101101) (tcp/set-header-value :seq-num 51976))
+    ;   [0 51976 0 2r1011010000000000]
+    ; ))
   )
+  (println "Done")
 )
