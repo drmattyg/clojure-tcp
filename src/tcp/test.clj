@@ -32,10 +32,14 @@
       )
     )
     (test/is
-      (=
-        (-> blank-header (tcp/set-header-value :source-port 8080)
-          (tcp/set-header-value :destination-port 443))
-        [(bit-or 8080 (bit-shift-left 443 16)) 0 0 0 0 0 0 0 0 0]
+      (let [PORT1 8080 PORT2 443 SEQNUM 20120]
+        (=
+          (-> blank-header (tcp/set-header-value :source-port PORT1)
+            (tcp/set-header-value :destination-port PORT2)
+            (tcp/set-header-value :seq-num SEQNUM)
+          )
+          [(bit-or PORT1 (bit-shift-left PORT2 16)) SEQNUM 0 0 0 0 0 0 0 0]
+        )
       )
     )
   )
