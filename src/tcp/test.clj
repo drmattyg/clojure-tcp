@@ -5,7 +5,7 @@
   (test/is (contains? tcp/header-template :seq-num))
 )
 (test/testing "Header generation"
-  (let [offset 7 size 13 blank-header [(int 0) (int 0) (int 0) (int 0)]]
+  (let [offset 7 size 13 blank-header (vec (repeat 10 0))]
     (test/is (= (tcp/make-bitmask 0 0) -1 ))
     (test/is 
       (= 
@@ -22,19 +22,22 @@
     (test/is
       (=
         (tcp/set-header-value blank-header :flags 2r101101)
-        [0 0 0 2r1011010000000000]
+        [0 0 0 2r1011010000000000 0 0 0 0 0 0]
       )
     )
     (test/is
       (=
         (tcp/set-header-value blank-header :seq-num 51976)
-        [0 51976 0 0]
+        [0 51976 0 0 0 0 0 0 0 0]
       )
     )
-    ; (test/is (=
-    ;   (-> blank-header (tcp/set-header-value :flags 2r101101) (tcp/set-header-value :seq-num 51976))
-    ;   [0 51976 0 2r1011010000000000]
-    ; ))
+    (test/is
+      (=
+        (-> blank-header (tcp/set-header-value :source-port 8080)
+          (tcp/set-header-value :destination-port 443))
+        [(bit-or 8080 (bit-shift-left 443 16)) 0 0 0 0 0 0 0 0 0]
+      )
+    )
   )
   (println "Done")
 )
