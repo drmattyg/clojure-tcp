@@ -48,7 +48,8 @@
           (tcp/header-template flag)
         ]
       (if (not (contains? header-template flag)) (throw (Exception. (str "Unknown flag: " flag))))
-     (vec (map-indexed 
+     (vec 
+      (map-indexed 
         #(if (= %1 word-offset)
           ; true
           (bit-or
@@ -59,6 +60,14 @@
           %2
         ) 
         header
-    ))
+      )
+    )
   )
+)
+
+(def control-bits {:urg 1 :ack 2 :psh 3 :rst 4 :syn 5 :fin 6})
+(defn set-control-bit [control-val flag set-val] 
+  (if-not (contains? control-bits flag) (throw (Exception. (str "Flag not found: " flag))))
+  (def bitfn (if set-val bit-set bit-clear))
+  (bitfn control-val (control-bits flag))
 )
