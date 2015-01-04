@@ -65,7 +65,7 @@
   )
 )
 
-(def control-bits {:urg 1 :ack 2 :psh 3 :rst 4 :syn 5 :fin 6})
+(def control-bits {:urg 0 :ack 1 :psh 2 :rst 3 :syn 4 :fin 5})
 (defn set-control-bit [control-val flag set-val] 
   (if-not (contains? control-bits flag) (throw (Exception. (str "Flag not found: " flag))))
   (def bitfn (if set-val bit-set bit-clear))

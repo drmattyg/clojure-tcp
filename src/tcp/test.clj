@@ -42,6 +42,18 @@
         )
       )
     )
+    (test/is
+      (tcp/set-control-bit 0 :urg true)
+      1
+    )
+    (test/is
+      (tcp/set-control-bit 3 :ack false)
+      1
+    )
+    (test/is
+      (-> 0 (tcp/set-control-bit :syn true) (tcp/set-control-bit :fin true) (tcp/set-control-bit :urg true))
+      2r100011
+    )
   )
   (println "Done")
 )
