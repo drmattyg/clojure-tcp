@@ -25,6 +25,8 @@
     ; data goes here after word 5
 )
 
+(def blank-header (vec (repeat 10 0)))
+
 (defn make-bitmask [size offset]
   "Generate an inverted bitmask with 'size zeros offset by 'offset ones"
    (-> (math/expt 2 size) 
@@ -71,3 +73,49 @@
   (def bitfn (if set-val bit-set bit-clear))
   (bitfn control-val (control-bits flag))
 )
+
+
+
+(def default-data-offset (* 4 (+ 10 5))) ; 5 word IP header + 10 word TCP header.  I think.
+
+(defn syn-packet-header [source-port destination-port init-seq-num]
+  (-> blank-header
+      (set-header-value :source-port source-port)
+      (set-header-value :destination-port destination-port)
+      (set-header-value :flags (set-control-bit :syn 1))
+      (set-header-value :data-offset default-data-offset)
+      (set-header-value :window 0x4470) ; default size from here http://technet.microsoft.com/en-us/library/cc938219.aspx
+      (set-header-value :seq-num init-seq-num)
+  )
+
+)
+
+(defn sum-segments [words] 
+  (reduce #(+ %1 (+ (bit-and 0xFFFF %2) (bit-shift-right %2 16))) 0 words) 
+)
+
+(defn tcp-checksum [header src-ip dest-ip data-length]
+  "Compute the TCP checksum.  See http://www.tcpipguide.com/free/t_TCPChecksumCalculationandtheTCPPseudoHeader-2.htm#Table_158 and http://www.docjar.org/html/api/com/act365/net/SocketUtils.java.html"
+  (let [pseudo-header-length 12 ; bytes
+        header-length 40 ; bytes
+        protocol 6 ; TCP protocol is always 6
+        tcp-segment-length (-> header-length (+ pseudo-header-length) (+ data-length))
+        pseudo-header [src-ip dest-ip protocol tcp-segment-length]
+
+    ]
+    (def s1 (sum-segments (concat pseudo-header header) )) ; sum 16 bit segments
+    (def s2 (+ (unsigned-bit-shift-right s1 16) (bit-and s1 0xFFFF))) ; sum halves
+    (def s3 (+ s2 (unsigned-bit-shift-right s2 16))) ; add carry
+    (bit-and 0xFFFF (bit-not s3)) ; 16 bit ones complement
+
+  )
+)
+
+(defn set-checksum [header source-ip dest-ip data-length]
+  (set-header-value header :checksum (tcp-checksum header source-ip dest-ip data-length))
+  )
+
+(defn ip-to-long [v]
+  (reduce #(+ %2 (bit-shift-left %1 8)) 0 v)
+
+  )
