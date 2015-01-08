@@ -77,12 +77,12 @@
 
 
 (def default-data-offset (* 4 (+ 10 5))) ; 5 word IP header + 10 word TCP header.  I think.
-
+(def blank-flag 0)
 (defn syn-packet-header [source-port destination-port init-seq-num]
   (-> blank-header
       (set-header-value :source-port source-port)
       (set-header-value :destination-port destination-port)
-      (set-header-value :flags (set-control-bit :syn 1))
+      (set-header-value :flags (set-control-bit blank-flag :syn 1))
       (set-header-value :data-offset default-data-offset)
       (set-header-value :window 0x4470) ; default size from here http://technet.microsoft.com/en-us/library/cc938219.aspx
       (set-header-value :seq-num init-seq-num)
