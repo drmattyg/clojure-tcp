@@ -119,3 +119,15 @@
   (reduce #(+ %2 (bit-shift-left %1 8)) 0 v)
 
   )
+
+(defn inet-to-long [inet]
+  (ip-to-long (map (partial bit-and 0xFF) (vec (.getAddress inet)))) ; the bit-and is required to do an unsigned cast from byte to int, otherwise they are autocast to signed ints
+  )
+
+(defn get-ip-by-name [name]
+
+  (inet-to-long 
+    (first (filter #(= (class %1) java.net.Inet4Address) (vec (java.net.Inet4Address/getAllByName name))))
+
+  )
+)
