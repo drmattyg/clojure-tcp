@@ -97,7 +97,7 @@
 (defn tcp-checksum [header src-ip dest-ip data-length]
   "Compute the TCP checksum.  See http://www.tcpipguide.com/free/t_TCPChecksumCalculationandtheTCPPseudoHeader-2.htm#Table_158 and http://www.docjar.org/html/api/com/act365/net/SocketUtils.java.html"
   (let [pseudo-header-length 12 ; bytes
-        header-length 40 ; bytes
+        header-length 24 ; bytes
         protocol 6 ; TCP protocol is always 6
         tcp-segment-length (-> header-length (+ pseudo-header-length) (+ data-length))
         pseudo-header [src-ip dest-ip protocol tcp-segment-length]
@@ -131,3 +131,26 @@
 
   )
 )
+
+(defn ubyte [val]
+  (if (>= val 128)
+  (byte (- val 256))
+  (byte val)))
+
+(defn ubyte-at [val offset]
+  (-> val (bit-shift-right (* 8 offset)) (bit-and 0xFF) (ubyte))
+)
+
+(defn header-to-byte-array [header]
+  (let [b (byte-array 24)]
+    (doseq [i (range 6)]
+      (aset-byte b (* 4 i) (ubyte-at (header i) 3))
+      (aset-byte b (+ (* 4 i) 1) (ubyte-at (header i) 2))
+      (aset-byte b (+ (* 4 i) 2) (ubyte-at (header i) 1))
+      (aset-byte b (+ (* 4 i) 3) (ubyte-at (header i) 0))
+    )
+    b
+  )
+
+)
+
